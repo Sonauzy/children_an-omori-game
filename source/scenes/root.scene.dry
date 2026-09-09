@@ -1,11 +1,11 @@
 title: Root Scene
 new-page: true
 
-This is the root scene of "Dendry-starter-pack". The root scene is normally used
-as a hub: the choices allow you to go to different sections of your
-story. In shorter works it may just function as the first scene in the
-game, sending the player off into the tree of choices. If the root
-scene doesn't have any choices that it can display, the game is over.
+= Children (an OMORI fangame)
+
+This is a interactive text game based on the game <span style="background-color: black; color: white;">OMORI</span>. Keep in mind that while this fan game will try to accurately potray the characters from the base game as it can, many details will have to be invented in order to better fill out the story and said characters. In spite of that, it will try to remain as faithful as possible to its source material.
+
+Of course, there will be heavy spoilers for <span style="background-color: black; color: white;">OMORI</span>.  For those who haven't (yet) played the game, I recommend playing it in order to get the full experience. 
 
 # Scenes with a top tag can be displayed here.
 - #top
