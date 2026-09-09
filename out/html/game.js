@@ -172,6 +172,15 @@
   window.dendryModifyUI = main;
   console.log("Modifying stats: see dendryUI.dendryEngine.state.qualities");
 
+  window.hideSidebarAndNotebook = function() {
+    document.getElementById('stats_sidebar').style.display = 'none';
+}
+
+  window.showSidebarAndNotebook = function() {
+    document.getElementById('stats_sidebar').style.display = '';
+
+};
+
   window.onload = function() {
     window.dendryUI.loadSettings();
     if (window.dendryUI.dark_mode) {
