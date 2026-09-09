@@ -1,9 +1,35 @@
-title: Scene One
+title: Start Game
+subtitle: What will await you out there...
 new-page: true
 tags: top
 
-This is the first scene of "Dendry-starter-pack". From this point, you can add
-further scenes and choices to flesh out your game.
+A young girl lay on her bed, sleeping quietly, neatly, and tidily, 
+as the sun rose to shine its light through the window. That was the case
+every morning, in the idyllic house and town she lived in. 
 
-# This goes directly to the hand scene.
-- @hand
+Slowly and steadily, she opened her eyes.
+
+- @gettingup: Sunlight and a ceiling fan greeted her from above.
+
+@gettingup
+
+She pulled herself out of bed, slowly and hesitantly. She turned her head to the right and saw her wardrobe and another boy on the bed right next to hers, still sleeping peacefully.
+
+- @bathroom
+
+@bathroom
+title: Her little brother was so cute when he slept like that.
+subtitle: She shouldn't wake him up. It's Sunday, after all.
+
+She went to the wardrobe and opened it, finding the clothes she would wear. She took the clothes and went to the bathroom to change her pajamas. It was like this all day, every day, for as long as she could remember.
+
+At some point, after she changed, she looked at the bathroom mirror, only to find herself staring back.
+
+- @intro: Who are you?
+
+@intro
+audio: shuffle music/WAS_IT_A_DREAM.mp3
+
+You are <span style="color: #800080;">MARI</span>. Star student, piano prodigy, beloved daughter, friend, sister, and above all, a good person.
+
+Or at least, you want to be one.
