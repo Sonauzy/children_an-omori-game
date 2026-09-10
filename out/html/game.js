@@ -1,6 +1,130 @@
 (function() {
   var game;
   var ui;
+    var typewriterNodes = [];
+    var typewriterQueue = [];
+    var typewriterTimer = null;
+    var typewriterObserver = null;
+    var typewriterChoices = [];
+    window.typewriterEnabled = localStorage.getItem('children_typewriter') === 'true';
+
+    function isChoiceTextNode(node) {
+        var element = node.parentElement;
+        while (element) {
+            if (element.classList && element.classList.contains('choices')) {
+                return true;
+            }
+            element = element.parentElement;
+        }
+        return false;
+    }
+
+    function showTypewriterChoices() {
+        typewriterChoices.forEach(function(choice) {
+            choice.style.visibility = '';
+        });
+        typewriterChoices = [];
+    }
+
+    function stopTypewriter(finishText) {
+        if (typewriterTimer) {
+            window.clearInterval(typewriterTimer.id);
+            if (finishText) {
+                typewriterTimer.node.nodeValue = typewriterTimer.text;
+            }
+            typewriterTimer = null;
+        }
+        typewriterQueue.forEach(function(item) {
+            if (finishText) {
+                item.node.nodeValue = item.text;
+            }
+        });
+        typewriterQueue = [];
+        showTypewriterChoices();
+    }
+
+    function collectTypewriterText() {
+        if (!window.typewriterEnabled) {
+            return;
+        }
+
+        var content = document.getElementById('content');
+        if (typewriterNodes.length > 0 && !content.contains(typewriterNodes[0])) {
+            if (typewriterTimer) {
+                window.clearInterval(typewriterTimer.id);
+                typewriterTimer = null;
+            }
+            typewriterNodes = [];
+            typewriterQueue = [];
+        }
+        var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+        var node;
+        while (node = walker.nextNode()) {
+            if (!node.nodeValue.trim() || isChoiceTextNode(node) ||
+                    typewriterNodes.indexOf(node) !== -1) {
+                continue;
+            }
+            typewriterNodes.push(node);
+            typewriterQueue.push({node: node, text: node.nodeValue});
+            node.nodeValue = '';
+        }
+
+        var choices = content.querySelectorAll('.choices');
+        for (var index = 0; index < choices.length; index++) {
+            if (typewriterChoices.indexOf(choices[index]) === -1) {
+                choices[index].style.visibility = 'hidden';
+                typewriterChoices.push(choices[index]);
+            }
+        }
+    }
+
+    function playNextTypewriterText() {
+        if (typewriterTimer || typewriterQueue.length === 0) {
+            if (!typewriterTimer && typewriterQueue.length === 0) {
+                showTypewriterChoices();
+            }
+            return;
+        }
+
+        var item = typewriterQueue.shift();
+        var index = 0;
+        typewriterTimer = {
+            node: item.node,
+            text: item.text,
+            id: window.setInterval(function() {
+                item.node.nodeValue = item.text.slice(0, ++index);
+                if (index >= item.text.length) {
+                    window.clearInterval(typewriterTimer.id);
+                    typewriterTimer = null;
+                    playNextTypewriterText();
+                }
+            }, 30)
+        };
+    }
+
+    function startTypewriter() {
+        if (!window.typewriterEnabled) {
+            return;
+        }
+        collectTypewriterText();
+        playNextTypewriterText();
+    }
+
+    function watchTypewriterContent() {
+        if (typewriterObserver || !window.MutationObserver) {
+            return;
+        }
+        typewriterObserver = new MutationObserver(function() {
+            if (window.typewriterEnabled) {
+                collectTypewriterText();
+                playNextTypewriterText();
+            }
+        });
+        typewriterObserver.observe(document.getElementById('content'), {
+            childList: true,
+            subtree: true
+        });
+    }
 
   var DateOptions = {hour: 'numeric',
                  minute: 'numeric',
@@ -77,6 +201,19 @@
       window.dendryUI.animate_bg = true;
       window.dendryUI.saveSettings();
   };
+
+  window.disableTypewriter = function() {
+      window.typewriterEnabled = false;
+      stopTypewriter(true);
+      window.localStorage.setItem('children_typewriter', 'false');
+  };
+
+  window.enableTypewriter = function() {
+      window.typewriterEnabled = true;
+      window.localStorage.setItem('children_typewriter', 'true');
+      watchTypewriterContent();
+      startTypewriter();
+  };
   
   window.disableAudio = function() {
       window.dendryUI.toggle_audio(false);
@@ -129,6 +266,11 @@
     } else {
         $('#animate_bg_no')[0].checked = true;
     }
+    if (window.typewriterEnabled) {
+        $('#typewriter_yes')[0].checked = true;
+    } else {
+        $('#typewriter_no')[0].checked = true;
+    }
     if (window.dendryUI.dark_mode) {
         $('#dark_mode')[0].checked = true;
     } else {
@@ -155,6 +297,7 @@
     if (window.justLoaded) {
         window.justLoaded = false;
     }
+    startTypewriter();
   };
 
   window.updateSidebar = function() {
@@ -166,6 +309,8 @@
 
   window.onDisplayContent = function() {
       window.updateSidebar();
+      watchTypewriterContent();
+      startTypewriter();
   };
 
   window.justLoaded = true;
@@ -183,6 +328,7 @@
 
   window.onload = function() {
     window.dendryUI.loadSettings();
+        watchTypewriterContent();
     if (window.dendryUI.dark_mode) {
         document.body.classList.add('dark-mode');
     }
