@@ -1,11 +1,6 @@
 (function() {
   var game;
   var ui;
-    var typewriterNodes = [];
-    var typewriterQueue = [];
-    var typewriterTimer = null;
-    var typewriterActive = false;
-    window.typewriterEnabled = localStorage.getItem('children_typewriter') === 'true';
 
   var DateOptions = {hour: 'numeric',
                  minute: 'numeric',
@@ -82,77 +77,6 @@
       window.dendryUI.animate_bg = true;
       window.dendryUI.saveSettings();
   };
-
-  window.disableTypewriter = function() {
-      window.typewriterEnabled = false;
-      window.finishTypewriter();
-      window.saveTypewriterSetting();
-  };
-
-  window.enableTypewriter = function() {
-      window.typewriterEnabled = true;
-      window.saveTypewriterSetting();
-      window.startTypewriter();
-  };
-
-  window.saveTypewriterSetting = function() {
-      localStorage.setItem('children_typewriter', window.typewriterEnabled);
-  };
-
-  window.finishTypewriter = function() {
-      if (typewriterTimer) {
-          window.clearInterval(typewriterTimer.id);
-          typewriterTimer.node.nodeValue = typewriterTimer.text;
-      }
-      typewriterQueue.forEach(function(item) {
-          item.node.nodeValue = item.text;
-      });
-      typewriterTimer = null;
-      typewriterQueue = [];
-      typewriterActive = false;
-  };
-
-  window.startTypewriter = function() {
-      if (!window.typewriterEnabled) {
-          return;
-      }
-
-      var content = document.getElementById('content');
-      var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
-      var node;
-      while (node = walker.nextNode()) {
-          if (!node.nodeValue.trim() || typewriterNodes.indexOf(node) !== -1) {
-              continue;
-          }
-
-          typewriterNodes.push(node);
-          typewriterQueue.push({node: node, text: node.nodeValue});
-          node.nodeValue = '';
-      }
-      scheduleNextTypewriterNode();
-  };
-
-  function scheduleNextTypewriterNode() {
-      if (typewriterActive || typewriterQueue.length === 0) {
-          return;
-      }
-
-      var item = typewriterQueue.shift();
-      var node = item.node;
-      var text = item.text;
-      var index = 0;
-      typewriterActive = true;
-      var timer = window.setInterval(function() {
-          node.nodeValue = text.slice(0, ++index);
-          if (index >= text.length) {
-              window.clearInterval(timer);
-              typewriterTimer = null;
-              typewriterActive = false;
-              scheduleNextTypewriterNode();
-          }
-      }, 30);
-      typewriterTimer = {id: timer, node: node, text: text};
-  }
   
   window.disableAudio = function() {
       window.dendryUI.toggle_audio(false);
@@ -205,11 +129,6 @@
     } else {
         $('#animate_bg_no')[0].checked = true;
     }
-    if (window.typewriterEnabled) {
-        $('#typewriter_yes')[0].checked = true;
-    } else {
-        $('#typewriter_no')[0].checked = true;
-    }
     if (window.dendryUI.dark_mode) {
         $('#dark_mode')[0].checked = true;
     } else {
@@ -247,7 +166,6 @@
 
   window.onDisplayContent = function() {
       window.updateSidebar();
-      window.startTypewriter();
   };
 
   window.justLoaded = true;
