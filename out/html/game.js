@@ -5,6 +5,7 @@
     var typewriterQueue = [];
     var typewriterTimer = null;
     var typewriterActive = false;
+    var typewriterChoicesHidden = false;
     window.typewriterEnabled = localStorage.getItem('children_typewriter') === 'true';
 
   var DateOptions = {hour: 'numeric',
@@ -110,6 +111,7 @@
       typewriterTimer = null;
       typewriterQueue = [];
       typewriterActive = false;
+      showTypewriterChoices();
   };
 
   window.startTypewriter = function() {
@@ -122,6 +124,10 @@
   };
 
   function queueTypewriterContent() {
+      if (!window.typewriterEnabled) {
+          return;
+      }
+
       var content = document.getElementById('content');
       if (typewriterTimer && !content.contains(typewriterTimer.node)) {
           window.clearInterval(typewriterTimer.id);
@@ -145,6 +151,9 @@
 
   function scheduleNextTypewriterNode() {
       if (typewriterActive || typewriterQueue.length === 0) {
+          if (!typewriterActive && typewriterQueue.length === 0) {
+              showTypewriterChoices();
+          }
           return;
       }
 
@@ -163,6 +172,25 @@
           }
       }, 30);
       typewriterTimer = {id: timer, node: node, text: text};
+  }
+
+  function hideTypewriterChoices() {
+      var choices = document.querySelectorAll('#content .choices');
+      for (var index = 0; index < choices.length; index++) {
+          choices[index].style.visibility = 'hidden';
+      }
+      typewriterChoicesHidden = choices.length > 0;
+  }
+
+  function showTypewriterChoices() {
+      if (!typewriterChoicesHidden) {
+          return;
+      }
+      var choices = document.querySelectorAll('#content .choices');
+      for (var index = 0; index < choices.length; index++) {
+          choices[index].style.visibility = '';
+      }
+      typewriterChoicesHidden = false;
   }
   
   window.disableAudio = function() {
@@ -247,6 +275,9 @@
     if (window.justLoaded) {
         window.justLoaded = false;
     }
+    if (window.typewriterEnabled) {
+        hideTypewriterChoices();
+    }
     window.startTypewriter();
   };
 
@@ -259,7 +290,9 @@
 
   window.onDisplayContent = function() {
       window.updateSidebar();
-      queueTypewriterContent();
+      if (window.typewriterEnabled) {
+          queueTypewriterContent();
+      }
       window.setTimeout(window.startTypewriter, 0);
   };
 
