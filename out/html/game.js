@@ -117,23 +117,11 @@
           return;
       }
 
-      queueTypewriterContent();
-      scheduleNextTypewriterNode();
-  };
-
-  function queueTypewriterContent() {
       var content = document.getElementById('content');
-      if (typewriterTimer && !content.contains(typewriterTimer.node)) {
-          window.clearInterval(typewriterTimer.id);
-          typewriterTimer = null;
-          typewriterQueue = [];
-          typewriterActive = false;
-      }
       var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
       var node;
       while (node = walker.nextNode()) {
-          if (!node.nodeValue.trim() || typewriterNodes.indexOf(node) !== -1 ||
-              node.parentElement.closest('.choices')) {
+          if (!node.nodeValue.trim() || typewriterNodes.indexOf(node) !== -1) {
               continue;
           }
 
@@ -141,6 +129,7 @@
           typewriterQueue.push({node: node, text: node.nodeValue});
           node.nodeValue = '';
       }
+      scheduleNextTypewriterNode();
   };
 
   function scheduleNextTypewriterNode() {
@@ -247,7 +236,6 @@
     if (window.justLoaded) {
         window.justLoaded = false;
     }
-    window.startTypewriter();
   };
 
   window.updateSidebar = function() {
@@ -259,8 +247,7 @@
 
   window.onDisplayContent = function() {
       window.updateSidebar();
-      queueTypewriterContent();
-      window.setTimeout(window.startTypewriter, 0);
+      window.startTypewriter();
   };
 
   window.justLoaded = true;
